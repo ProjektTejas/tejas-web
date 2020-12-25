@@ -1,20 +1,28 @@
 {
-  "name": "tejas-web",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "next": "10.0.4",
-    "react": "17.0.1",
-    "react-dom": "17.0.1"
-  },
-  "devDependencies": {
-    "@types/node": "^14.14.16",
-    "@types/react": "^17.0.0",
-    "typescript": "^4.1.3"
-  }
+    "name": "tejas-web",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start"
+    },
+    "dependencies": {
+        "@ant-design/icons": "^4.3.0",
+        "antd": "^4.9.4",
+        "chonky": "^2.1.0",
+        "chonky-icon-fontawesome": "^2.1.0",
+        "next": "10.0.4",
+        "react": "17.0.1",
+        "react-dom": "17.0.1",
+        "react-is": "^17.0.1",
+        "styled-components": "^5.2.1"
+    },
+    "devDependencies": {
+        "@types/node": "^14.14.16",
+        "@types/react": "^17.0.0",
+        "babel-plugin-styled-components": "^1.12.0",
+        "tsdef": "^0.0.14",
+        "typescript": "^4.1.3"
+    }
 }
