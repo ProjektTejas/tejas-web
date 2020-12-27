@@ -12,7 +12,7 @@ import {
 
 import { useState } from "react";
 
-const Sidebar = ({ width }) => {
+const Sidebar = ({ width, currentStep, setCurrentStep }) => {
     const [collapsed, setCollapsed] = useState(false);
 
     return (
@@ -27,23 +27,28 @@ const Sidebar = ({ width }) => {
                 overflow: "auto",
             }}
         >
-            <Menu mode="inline" style={{ height: "100%" }}>
-                <Menu.Item key="1" icon={<BulbOutlined />}>
+            <Menu
+                mode="inline"
+                style={{ height: "100%" }}
+                defaultSelectedKeys={[currentStep]}
+                onClick={(e) => setCurrentStep(e.key)}
+            >
+                <Menu.Item key="introduction" icon={<BulbOutlined />}>
                     Introduction
                 </Menu.Item>
-                <Menu.Item key="2" icon={<ApartmentOutlined />}>
+                <Menu.Item key="model" icon={<ApartmentOutlined />}>
                     Model
                 </Menu.Item>
-                <Menu.Item key="3" icon={<DatabaseOutlined />}>
+                <Menu.Item key="dataset" icon={<DatabaseOutlined />}>
                     Dataset
                 </Menu.Item>
-                <Menu.Item key="4" icon={<RocketOutlined />}>
+                <Menu.Item key="training" icon={<RocketOutlined />}>
                     Training
                 </Menu.Item>
-                <Menu.Item key="5" icon={<ExperimentOutlined />}>
+                <Menu.Item key="inference" icon={<ExperimentOutlined />}>
                     Inference
                 </Menu.Item>
-                <Menu.Item key="6" icon={<DownCircleOutlined />}>
+                <Menu.Item key="download" icon={<DownCircleOutlined />}>
                     Download
                 </Menu.Item>
             </Menu>
