@@ -7,6 +7,8 @@
 import {
     ChonkyActions,
     ChonkyFileActionData,
+    ChonkyIconName,
+    defineFileAction,
     FileArray,
     FileBrowserProps,
     FileData,
@@ -30,34 +32,34 @@ interface CustomFileData extends FileData {
     parentId?: string;
     childrenIds?: string[];
 }
-interface CustomFileMap {
+export interface CustomFileMap {
     [fileId: string]: CustomFileData;
 }
 
-// Helper method to attach our custom TypeScript types to the imported JSON file map.
-const prepareCustomFileMap = () => {
-    const baseFileMap = (DemoFsMap.fileMap as unknown) as CustomFileMap;
-    const rootFolderId = DemoFsMap.rootFolderId;
-    return { baseFileMap, rootFolderId };
-};
+// // Helper method to attach our custom TypeScript types to the imported JSON file map.
+// const prepareCustomFileMap = () => {
+//     const baseFileMap = (DemoFsMap.fileMap as unknown) as CustomFileMap;
+//     const rootFolderId = DemoFsMap.rootFolderId;
+//     return { baseFileMap, rootFolderId };
+// };
 
 // Hook that sets up our file map and defines functions used to mutate - `deleteFiles`,
 // `moveFiles`, and so on.
-const useCustomFileMap = () => {
-    const { baseFileMap, rootFolderId } = useMemo(prepareCustomFileMap, []);
+const useCustomFileMap = (fileMap, currentFolderId) => {
+    // const { baseFileMap, rootFolderId } = useMemo(prepareCustomFileMap, []);
 
     // Setup the React state for our file map and the current folder.
-    const [fileMap, setFileMap] = useState(baseFileMap);
-    const [currentFolderId, setCurrentFolderId] = useState(rootFolderId);
+    // const [fileMap, setFileMap] = useState(baseFileMap);
+    // const [currentFolderId, setCurrentFolderId] = useState(rootFolderId);
 
-    // Setup the function used to reset our file map to its initial value. Note that
-    // here and below we will always use `useCallback` hook for our functions - this is
-    // a crucial React performance optimization, read more about it here:
-    // https://reactjs.org/docs/hooks-reference.html#usecallback
-    const resetFileMap = useCallback(() => {
-        setFileMap(baseFileMap);
-        setCurrentFolderId(rootFolderId);
-    }, [baseFileMap, rootFolderId]);
+    // // Setup the function used to reset our file map to its initial value. Note that
+    // // here and below we will always use `useCallback` hook for our functions - this is
+    // // a crucial React performance optimization, read more about it here:
+    // // https://reactjs.org/docs/hooks-reference.html#usecallback
+    // const resetFileMap = useCallback(() => {
+    //     setFileMap(baseFileMap);
+    //     setCurrentFolderId(rootFolderId);
+    // }, [baseFileMap, rootFolderId]);
 
     // Setup logic to listen to changes in current folder ID without having to update
     // `useCallback` hooks. Read more about it here:
@@ -67,128 +69,133 @@ const useCustomFileMap = () => {
         currentFolderIdRef.current = currentFolderId;
     }, [currentFolderId]);
 
-    // Function that will be called when user deletes files either using the toolbar
-    // button or `Delete` key.
-    const deleteFiles = useCallback((files: CustomFileData[]) => {
-        // We use the so-called "functional update" to set the new file map. This
-        // lets us access the current file map value without having to track it
-        // explicitly. Read more about it here:
-        // https://reactjs.org/docs/hooks-reference.html#functional-updates
-        setFileMap((currentFileMap) => {
-            // Create a copy of the file map to make sure we don't mutate it.
-            const newFileMap = { ...currentFileMap };
+    // // Function that will be called when user deletes files either using the toolbar
+    // // button or `Delete` key.
+    // const deleteFiles = useCallback((files: CustomFileData[]) => {
+    //     // We use the so-called "functional update" to set the new file map. This
+    //     // lets us access the current file map value without having to track it
+    //     // explicitly. Read more about it here:
+    //     // https://reactjs.org/docs/hooks-reference.html#functional-updates
+    //     setFileMap((currentFileMap) => {
+    //         // Create a copy of the file map to make sure we don't mutate it.
+    //         const newFileMap = { ...currentFileMap };
 
-            files.forEach((file) => {
-                // Delete file from the file map.
-                delete newFileMap[file.id];
+    //         files.forEach((file) => {
+    //             // Delete file from the file map.
+    //             delete newFileMap[file.id];
 
-                // Update the parent folder to make sure it doesn't try to load the
-                // file we just deleted.
-                if (file.parentId) {
-                    const parent = newFileMap[file.parentId]!;
-                    const newChildrenIds = parent.childrenIds!.filter(
-                        (id) => id !== file.id
-                    );
-                    newFileMap[file.parentId] = {
-                        ...parent,
-                        childrenIds: newChildrenIds,
-                        childrenCount: newChildrenIds.length,
-                    };
-                }
-            });
+    //             // Update the parent folder to make sure it doesn't try to load the
+    //             // file we just deleted.
+    //             if (file.parentId) {
+    //                 const parent = newFileMap[file.parentId]!;
+    //                 const newChildrenIds = parent.childrenIds!.filter(
+    //                     (id) => id !== file.id
+    //                 );
+    //                 newFileMap[file.parentId] = {
+    //                     ...parent,
+    //                     childrenIds: newChildrenIds,
+    //                     childrenCount: newChildrenIds.length,
+    //                 };
+    //             }
+    //         });
 
-            return newFileMap;
-        });
-    }, []);
+    //         return newFileMap;
+    //     });
+    // }, []);
 
-    // Function that will be called when files are moved from one folder to another
-    // using drag & drop.
-    const moveFiles = useCallback(
-        (
-            files: CustomFileData[],
-            source: CustomFileData,
-            destination: CustomFileData
-        ) => {
-            setFileMap((currentFileMap) => {
-                const newFileMap = { ...currentFileMap };
-                const moveFileIds = new Set(files.map((f) => f.id));
+    // // Function that will be called when files are moved from one folder to another
+    // // using drag & drop.
+    // const moveFiles = useCallback(
+    //     (
+    //         files: CustomFileData[],
+    //         source: CustomFileData,
+    //         destination: CustomFileData
+    //     ) => {
+    //         setFileMap((currentFileMap) => {
+    //             const newFileMap = { ...currentFileMap };
+    //             const moveFileIds = new Set(files.map((f) => f.id));
 
-                // Delete files from their source folder.
-                const newSourceChildrenIds = source.childrenIds!.filter(
-                    (id) => !moveFileIds.has(id)
-                );
-                newFileMap[source.id] = {
-                    ...source,
-                    childrenIds: newSourceChildrenIds,
-                    childrenCount: newSourceChildrenIds.length,
-                };
+    //             // Delete files from their source folder.
+    //             const newSourceChildrenIds = source.childrenIds!.filter(
+    //                 (id) => !moveFileIds.has(id)
+    //             );
+    //             newFileMap[source.id] = {
+    //                 ...source,
+    //                 childrenIds: newSourceChildrenIds,
+    //                 childrenCount: newSourceChildrenIds.length,
+    //             };
 
-                // Add the files to their destination folder.
-                const newDestinationChildrenIds = [
-                    ...destination.childrenIds!,
-                    ...files.map((f) => f.id),
-                ];
-                newFileMap[destination.id] = {
-                    ...destination,
-                    childrenIds: newDestinationChildrenIds,
-                    childrenCount: newDestinationChildrenIds.length,
-                };
+    //             // Add the files to their destination folder.
+    //             const newDestinationChildrenIds = [
+    //                 ...destination.childrenIds!,
+    //                 ...files.map((f) => f.id),
+    //             ];
+    //             newFileMap[destination.id] = {
+    //                 ...destination,
+    //                 childrenIds: newDestinationChildrenIds,
+    //                 childrenCount: newDestinationChildrenIds.length,
+    //             };
 
-                // Finally, update the parent folder ID on the files from source folder
-                // ID to the destination folder ID.
-                files.forEach((file) => {
-                    newFileMap[file.id] = {
-                        ...file,
-                        parentId: destination.id,
-                    };
-                });
+    //             // Finally, update the parent folder ID on the files from source folder
+    //             // ID to the destination folder ID.
+    //             files.forEach((file) => {
+    //                 newFileMap[file.id] = {
+    //                     ...file,
+    //                     parentId: destination.id,
+    //                 };
+    //             });
 
-                return newFileMap;
-            });
-        },
-        []
-    );
+    //             return newFileMap;
+    //         });
+    //     },
+    //     []
+    // );
 
-    // Function that will be called when user creates a new folder using the toolbar
-    // button. That that we use incremental integer IDs for new folder, but this is
-    // not a good practice in production! Instead, you should use something like UUIDs
-    // or MD5 hashes for file paths.
-    const idCounter = useRef(0);
-    const createFolder = useCallback((folderName: string) => {
-        setFileMap((currentFileMap) => {
-            const newFileMap = { ...currentFileMap };
+    // // Function that will be called when user creates a new folder using the toolbar
+    // // button. That that we use incremental integer IDs for new folder, but this is
+    // // not a good practice in production! Instead, you should use something like UUIDs
+    // // or MD5 hashes for file paths.
+    // const idCounter = useRef(0);
+    // const createFolder = useCallback((folderName: string) => {
+    //     setFileMap((currentFileMap) => {
+    //         const newFileMap = { ...currentFileMap };
 
-            // Create the new folder
-            const newFolderId = `new-folder-${idCounter.current++}`;
-            newFileMap[newFolderId] = {
-                id: newFolderId,
-                name: folderName,
-                isDir: true,
-                modDate: new Date(),
-                parentId: currentFolderIdRef.current,
-                childrenIds: [],
-                childrenCount: 0,
-            };
+    //         // Create the new folder
+    //         const newFolderId = `new-folder-${idCounter.current++}`;
+    //         newFileMap[newFolderId] = {
+    //             id: newFolderId,
+    //             name: folderName,
+    //             isDir: true,
+    //             modDate: new Date(),
+    //             parentId: currentFolderIdRef.current,
+    //             childrenIds: [],
+    //             childrenCount: 0,
+    //         };
 
-            // Update parent folder to reference the new folder.
-            const parent = newFileMap[currentFolderIdRef.current];
-            newFileMap[currentFolderIdRef.current] = {
-                ...parent,
-                childrenIds: [...parent.childrenIds!, newFolderId],
-            };
+    //         // Update parent folder to reference the new folder.
+    //         const parent = newFileMap[currentFolderIdRef.current];
+    //         newFileMap[currentFolderIdRef.current] = {
+    //             ...parent,
+    //             childrenIds: [...parent.childrenIds!, newFolderId],
+    //         };
 
-            return newFileMap;
-        });
-    }, []);
+    //         return newFileMap;
+    //     });
+    // }, []);
 
+    // return {
+    //     fileMap,
+    //     setFileMap,
+    //     currentFolderId,
+    //     setCurrentFolderId,
+    //     resetFileMap,
+    //     deleteFiles,
+    //     moveFiles,
+    //     createFolder,
+    // };
     return {
         fileMap,
         currentFolderId,
-        setCurrentFolderId,
-        resetFileMap,
-        deleteFiles,
-        moveFiles,
-        createFolder,
     };
 };
 
@@ -197,10 +204,14 @@ export const useFiles = (
     currentFolderId: string
 ): FileArray => {
     return useMemo(() => {
+        // const baseFileMap = (fileMap.fileMap as unknown) as CustomFileMap;
+        // console.log(currentFolderId);
+        // console.log(fileMap[currentFolderId]);
         const currentFolder = fileMap[currentFolderId];
         const childrenIds = currentFolder.childrenIds!;
         const files = childrenIds.map((fileId: string) => fileMap[fileId]);
         return files;
+        // return [];
     }, [currentFolderId, fileMap]);
 };
 
@@ -209,6 +220,8 @@ export const useFolderChain = (
     currentFolderId: string
 ): FileArray => {
     return useMemo(() => {
+        // console.log(fileMap);
+
         const currentFolder = fileMap[currentFolderId];
 
         const folderChain = [currentFolder];
@@ -225,18 +238,20 @@ export const useFolderChain = (
         }
 
         return folderChain;
+        // return [];
     }, [currentFolderId, fileMap]);
 };
 
 export const useFileActionHandler = (
     setCurrentFolderId: (folderId: string) => void,
-    deleteFiles: (files: CustomFileData[]) => void,
-    moveFiles: (
-        files: FileData[],
-        source: FileData,
-        destination: FileData
-    ) => void,
-    createFolder: (folderName: string) => void
+    resetFolders: () => void
+    // deleteFiles: (files: CustomFileData[]) => void,
+    // moveFiles: (
+    //     files: FileData[],
+    //     source: FileData,
+    //     destination: FileData
+    // ) => void,
+    // createFolder: (folderName: string) => void
 ) => {
     return useCallback(
         (data: ChonkyFileActionData) => {
@@ -248,72 +263,87 @@ export const useFileActionHandler = (
                     return;
                 }
             } else if (data.id === ChonkyActions.DeleteFiles.id) {
-                deleteFiles(data.state.selectedFilesForAction!);
             } else if (data.id === ChonkyActions.MoveFiles.id) {
-                moveFiles(
-                    data.payload.files,
-                    data.payload.source!,
-                    data.payload.destination
-                );
             } else if (data.id === ChonkyActions.CreateFolder.id) {
-                const folderName = prompt(
-                    "Provide the name for your new folder:"
-                );
-                if (folderName) createFolder(folderName);
+            } else if (data.id == resetFoldersAction.id) {
+                resetFolders();
             }
 
             showActionNotification(data);
         },
-        [createFolder, deleteFiles, moveFiles, setCurrentFolderId]
+        [setCurrentFolderId]
     );
 };
 
-export type VFSProps = Partial<FileBrowserProps>;
+const resetFoldersAction = defineFileAction({
+    id: "reset_folders",
+    requiresSelection: false,
+    button: {
+        name: "Reset Dataset",
+        toolbar: true,
+        contextMenu: true,
+        icon: ChonkyIconName.trash,
+    },
+});
 
-export const VFSBrowser: React.FC<VFSProps> = React.memo((props) => {
-    const {
-        fileMap,
-        currentFolderId,
-        setCurrentFolderId,
-        resetFileMap,
-        deleteFiles,
-        moveFiles,
-        createFolder,
-    } = useCustomFileMap();
-    const files = useFiles(fileMap, currentFolderId);
-    const folderChain = useFolderChain(fileMap, currentFolderId);
-    const handleFileAction = useFileActionHandler(
-        setCurrentFolderId,
-        deleteFiles,
-        moveFiles,
-        createFolder
-    );
-    const fileActions = useMemo(
-        () => [
-            ChonkyActions.CreateFolder,
-            ChonkyActions.DeleteFiles,
-            ChonkyActions.DownloadFiles,
-            ChonkyActions.StartDragNDrop,
-            ChonkyActions.UploadFiles,
-        ],
-        []
-    );
-    const thumbnailGenerator = useCallback(
-        (file: FileData) =>
-            file.thumbnailUrl ? `https://chonky.io${file.thumbnailUrl}` : null,
-        []
-    );
+// export type VFSProps = Partial<FileBrowserProps>;
+export interface VFSProps {
+    fileMap: any;
+    currentFolderId: string;
+    setCurrentFolderId: any;
+    resetFileMap: any;
+}
 
-    return (
-        <div style={{ height: "60vh" }}>
+export const VFSBrowser: React.FC<VFSProps> = React.memo(
+    ({ fileMap, currentFolderId, setCurrentFolderId, resetFileMap }) => {
+        // console.log(fileMap);
+        // const {
+        //     fileMap,
+        //     // setFileMap,
+        //     currentFolderId,
+        //     // setCurrentFolderId,
+        //     // resetFileMap,
+        //     // deleteFiles,
+        //     // moveFiles,
+        //     // createFolder,
+        // } = useCustomFileMap();
+        const files = useFiles(fileMap, currentFolderId);
+        const folderChain = useFolderChain(fileMap, currentFolderId);
+        const handleFileAction = useFileActionHandler(
+            setCurrentFolderId,
+            resetFileMap
+            // deleteFiles,
+            // moveFiles,
+            // createFolder
+        );
+        const fileActions = useMemo(
+            () => [
+                resetFoldersAction,
+                // ChonkyActions.CreateFolder,
+                // ChonkyActions.DeleteFiles,
+                // ChonkyActions.DownloadFiles,
+                // ChonkyActions.StartDragNDrop,
+                // ChonkyActions.UploadFiles,
+            ],
+            []
+        );
+        const thumbnailGenerator = useCallback(
+            (file: FileData) =>
+                file.thumbnailUrl
+                    ? `https://chonky.io${file.thumbnailUrl}`
+                    : null,
+            []
+        );
+
+        return (
             <FullFileBrowser
                 files={files}
                 folderChain={folderChain}
                 fileActions={fileActions}
                 onFileAction={handleFileAction}
                 thumbnailGenerator={thumbnailGenerator}
-                {...props}
+                // {...props}
             />
-        </div>
-    );
-});
+        );
+    }
+);

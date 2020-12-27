@@ -19,7 +19,7 @@ export const showActionNotification = (data: ChonkyFileActionData) => {
 
     const textParts: string[] = [];
     textParts.push(
-        `<div class="noty-action">Action: <code>${data.action.id}</code></div>`
+        `<div className="noty-action">Action: <code>${data.action.id}</code></div>`
     );
 
     if (data.id === ChonkyActions.OpenFiles.id) {
