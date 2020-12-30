@@ -6,11 +6,41 @@ import Home from "./home";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 // Prevent fontawesome from adding its CSS since we did it manually above:
 import { config } from "@fortawesome/fontawesome-svg-core";
+import { MutableRefObject, useEffect, useRef } from "react";
 config.autoAddCss = false; /* eslint-disable import/first */
 
 // Somewhere in your `index.ts`:
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
 export default function App() {
-    return <Home />;
+    const webSocket: MutableRefObject<WebSocket> = useRef(null);
+
+    useEffect(() => {
+        // effect
+        webSocket.current = new WebSocket("ws://localhost:5000/ws");
+        webSocket.current.onmessage = (message) => {
+            console.log(message);
+        };
+        return () => {
+            // cleanup
+            webSocket.current.close();
+        };
+    }, []);
+
+    return (
+        <>
+            <div>
+                <button
+                    onClick={() => {
+                        if (webSocket.current !== null) {
+                            webSocket.current.send("Hello");
+                        }
+                    }}
+                >
+                    SendMessage
+                </button>
+            </div>
+            <Home />
+        </>
+    );
 }
