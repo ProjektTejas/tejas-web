@@ -13,33 +13,26 @@ config.autoAddCss = false; /* eslint-disable import/first */
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
 export default function App() {
-    const webSocket: MutableRefObject<WebSocket> = useRef(null);
-
-    useEffect(() => {
-        // effect
-        webSocket.current = new WebSocket("ws://localhost:5000/ws");
-        webSocket.current.onmessage = (message) => {
-            console.log(message);
-        };
-        return () => {
-            // cleanup
-            webSocket.current.close();
-        };
-    }, []);
+    // This was for WebSockets, but no backend support for now
+    // const webSocket: MutableRefObject<WebSocket> = useRef(null);
+    //
+    // useEffect(() => {
+    //     // effect
+    //     webSocket.current = new WebSocket("ws://localhost:5000/");
+    //     // webSocket.current = new WebSocket(
+    //     //     "wss://ngo7vj2041.execute-api.ap-south-1.amazonaws.com/dev/ws"
+    //     // );
+    //     webSocket.current.onmessage = (message) => {
+    //         console.log(message);
+    //     };
+    //     return () => {
+    //         // cleanup
+    //         webSocket.current.close();
+    //     };
+    // }, []);
 
     return (
         <>
-            <div>
-                <button
-                    onClick={() => {
-                        if (webSocket.current !== null) {
-                            webSocket.current.send("Hello");
-                        }
-                    }}
-                >
-                    SendMessage
-                </button>
-            </div>
             <Home />
         </>
     );
