@@ -1,5 +1,6 @@
 import { InboxOutlined } from "@ant-design/icons";
 import { Button, Col, Row, Spin } from "antd";
+import Title from "antd/lib/typography/Title";
 import Dragger from "antd/lib/upload/Dragger";
 import JSZip from "jszip";
 import React, { useEffect, useState } from "react";
@@ -131,6 +132,15 @@ const Dataset = (props: Props) => {
 
     return (
         <>
+            <Title
+                style={{
+                    textAlign: "center",
+                    fontFamily: "IBM Plex Mono",
+                    fontSize: "4em",
+                }}
+            >
+                Dataset
+            </Title>
             <Row gutter={[8, 8]}>
                 <Col span={24} style={{ height: "60vh" }}>
                     <VFSBrowser
@@ -245,7 +255,7 @@ const Dataset = (props: Props) => {
                 </Row>
             )}
 
-            <Row gutter={[8, 8]}>
+            {/* <Row gutter={[8, 8]}>
                 <Button
                     onClick={async () => {
                         // const fileUrl = URL.createObjectURL(
@@ -260,7 +270,7 @@ const Dataset = (props: Props) => {
                 >
                     Generate
                 </Button>
-            </Row>
+            </Row> */}
         </>
     );
 };

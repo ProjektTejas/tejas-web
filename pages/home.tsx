@@ -36,8 +36,10 @@ const Home = () => {
             >
                 <Content
                     style={{
+                        margin: "24px",
                         padding: "24px",
                         minHeight: 280,
+                        background: "#fff",
                     }}
                 >
                     <div
