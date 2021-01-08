@@ -1,3 +1,4 @@
+import { Divider } from "antd";
 import Title from "antd/lib/typography/Title";
 
 interface Props {
@@ -16,6 +17,7 @@ const Download = (props: Props) => {
             >
                 Download
             </Title>
+            <Divider dashed />
         </div>
     );
 };

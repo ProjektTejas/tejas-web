@@ -77,6 +77,9 @@ const Model = (props: Props) => {
                                             <Descriptions.Item label="Model Type">
                                                 Classifier
                                             </Descriptions.Item>
+                                            <Descriptions.Item label="Release Year">
+                                                2018
+                                            </Descriptions.Item>
                                         </Descriptions>
                                     </Col>
                                 </Row>

@@ -4,6 +4,12 @@ const MultipleFolderError = {
         "Please upload/select a single folder that contains the class name folders with images 😀",
 };
 
+const EmptyDataset = {
+    title: "Empty Dataset",
+    message:
+        "Please upload a Image Folder in the Dataset section to train your model",
+};
+
 const MaxFilesReachedError = {
     title: "Maximum Files Reached",
     message:
@@ -29,4 +35,5 @@ export {
     MaxFilesReachedError,
     FileTypeNotSupported,
     IncorrectFolderStructure,
+    EmptyDataset,
 };

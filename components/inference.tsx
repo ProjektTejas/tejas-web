@@ -1,3 +1,4 @@
+import { Divider } from "antd";
 import Title from "antd/lib/typography/Title";
 
 interface Props {
@@ -16,6 +17,8 @@ const Inference = (props: Props) => {
             >
                 Inference
             </Title>
+
+            <Divider dashed />
         </div>
     );
 };

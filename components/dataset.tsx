@@ -1,5 +1,5 @@
 import { InboxOutlined } from "@ant-design/icons";
-import { Button, Col, Row, Spin } from "antd";
+import { Button, Col, Divider, Row, Spin } from "antd";
 import Title from "antd/lib/typography/Title";
 import Dragger from "antd/lib/upload/Dragger";
 import JSZip from "jszip";
@@ -14,7 +14,9 @@ import {
 } from "./helpers/uploadModals";
 
 interface Props {
-    showModal: any;
+    showModal: (arg0: { title: string; message: string }) => void;
+    fileList: any;
+    setFileList;
 }
 
 const blankFileMap = {
@@ -31,18 +33,17 @@ const blankFileMap = {
 };
 
 const Dataset = (props: Props) => {
-    var zip: JSZip = new JSZip();
     var dataUrl: string;
     var totalFiles: number = 0;
 
-    const [fileList, setFileList] = useState([]);
-    const [debouncedFileList] = useDebounce(fileList, 1000);
+    // const [fileList, setFileList] = useState([]);
+    const [debouncedFileList] = useDebounce(props.fileList, 1000);
     // var fileList = [];
 
     // Listen to the changes in fileList and update the Chonky UI accordingly
     useEffect(() => {
         // effect
-        console.log(fileList);
+        // console.log(props.fileList);
 
         // setFileMap(blankFileMap);
 
@@ -104,31 +105,12 @@ const Dataset = (props: Props) => {
 
     const resetFileMap = () => {
         // fileList = [];
-        setFileList([]);
-        zip = new JSZip();
+        props.setFileList([]);
         totalFiles = 0;
         setFileMap(blankFileMap);
         console.info("Folders Reset Successfully");
         setShowLoading(false);
     };
-
-    const resizeImage224 = (file): Promise<string> =>
-        new Promise((resolve) => {
-            FileResizer.imageFileResizer(
-                file,
-                224,
-                224,
-                "JPEG",
-                90,
-                0,
-                async (uri: string) => {
-                    resolve(uri);
-                },
-                "base64",
-                224,
-                224
-            );
-        });
 
     return (
         <>
@@ -142,7 +124,7 @@ const Dataset = (props: Props) => {
                 Dataset
             </Title>
             <Row gutter={[8, 8]}>
-                <Col span={24} style={{ height: "60vh" }}>
+                <Col span={24} style={{ height: "50vh" }}>
                     <VFSBrowser
                         currentFolderId={currentFolderId}
                         setCurrentFolderId={setCurrentFolderId}
@@ -152,18 +134,21 @@ const Dataset = (props: Props) => {
                 </Col>
             </Row>
             {showLoading && (
-                <Row gutter={[8, 8]}>
-                    <Col
-                        span={24}
-                        style={{
-                            height: "20vh",
-                            fontFamily: "IBM Plex Mono",
-                            textAlign: "center",
-                        }}
-                    >
-                        <Spin /> Loading your files
-                    </Col>
-                </Row>
+                <>
+                    <Divider />
+                    <Row gutter={[8, 8]}>
+                        <Col
+                            span={24}
+                            style={{
+                                height: "20vh",
+                                fontFamily: "IBM Plex Mono",
+                                textAlign: "center",
+                            }}
+                        >
+                            <Spin /> Loading your files
+                        </Col>
+                    </Row>
+                </>
             )}
             {!showLoading && (
                 <Row gutter={[8, 8]}>
@@ -172,7 +157,7 @@ const Dataset = (props: Props) => {
                             {...props}
                             customRequest={({ onSuccess, onError, file }) => {
                                 setShowLoading(true);
-                                console.log(file);
+                                // console.log(file);
                                 if (
                                     file.type == "image/jpeg" ||
                                     file.type == "image/png"
@@ -189,21 +174,6 @@ const Dataset = (props: Props) => {
 
                                         resetFileMap();
                                     } else {
-                                        // const imageUri: string = await resizeImage224(
-                                        //     file
-                                        // );
-
-                                        // const imageBlob = await (
-                                        //     await fetch(imageUri)
-                                        // ).blob();
-
-                                        // zip.file(
-                                        //     file.webkitRelativePath,
-                                        //     imageBlob
-                                        // );
-
-                                        // console.log(imageBlob);
-                                        // console.log(totalFiles);
                                         if (totalFiles > 100) {
                                             resetFileMap();
                                             props.showModal(
@@ -212,7 +182,7 @@ const Dataset = (props: Props) => {
                                         }
 
                                         // update the fileList
-                                        setFileList((prevState) => [
+                                        props.setFileList((prevState) => [
                                             ...prevState,
                                             file,
                                         ]);

@@ -1,8 +1,9 @@
-import { Card, Col, Divider, Row, Steps, Typography } from "antd";
+import { Button, Card, Col, Divider, Row, Steps, Typography } from "antd";
 import { useState } from "react";
 import AnimatedFire from "./fun-stuff/fire";
 
 import Image from "next/image";
+import { RightCircleOutlined } from "@ant-design/icons";
 
 const { Title, Paragraph, Text } = Typography;
 const { Step } = Steps;
@@ -123,6 +124,22 @@ const Introduction = (props: Props) => {
                                 </Col>
                             </Row>
                         </Card>
+                        <Divider />
+                        <Row
+                            justify="center"
+                            style={{
+                                textAlign: "center",
+                            }}
+                        >
+                            <Col span={24}>
+                                <Button
+                                    type="primary"
+                                    icon={<RightCircleOutlined />}
+                                >
+                                    Start Experimenting !
+                                </Button>
+                            </Col>
+                        </Row>
                     </Typography>
                 </Col>
             </Row>

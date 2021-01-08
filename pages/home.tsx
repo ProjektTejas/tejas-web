@@ -10,6 +10,7 @@ import Dataset from "../components/dataset";
 import Training from "../components/training";
 import Inference from "../components/inference";
 import Download from "../components/download";
+import JSZip from "jszip";
 
 const Home = () => {
     const [currentStep, setCurrentStep] = useState("introduction");
@@ -23,6 +24,11 @@ const Home = () => {
         setModalData(data);
         setModalVisible(true);
     };
+
+    // DATASET STATE
+    const [fileList, setFileList] = useState([]);
+    const [zipDataset, setZipDataset] = useState(new JSZip());
+
     return (
         <>
             <Layout
@@ -55,11 +61,15 @@ const Home = () => {
                     </div>
 
                     <div className={currentStep !== "dataset" ? "hidden" : ""}>
-                        <Dataset showModal={showModal} />
+                        <Dataset
+                            fileList={fileList}
+                            setFileList={setFileList}
+                            showModal={showModal}
+                        />
                     </div>
 
                     <div className={currentStep !== "training" ? "hidden" : ""}>
-                        <Training showModal={showModal} />
+                        <Training fileList={fileList} showModal={showModal} />
                     </div>
 
                     <div
