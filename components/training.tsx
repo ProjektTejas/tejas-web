@@ -1,5 +1,18 @@
-import { ClockCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
-import { Button, Descriptions, Divider, Row, Space, Timeline } from "antd";
+import {
+    ClockCircleOutlined,
+    ExperimentOutlined,
+    RightCircleOutlined,
+} from "@ant-design/icons";
+import {
+    Button,
+    Descriptions,
+    Divider,
+    Progress,
+    Row,
+    Space,
+    Timeline,
+    Typography,
+} from "antd";
 import Title from "antd/lib/typography/Title";
 import JSZip from "jszip";
 import { useEffect, useRef, useState } from "react";
@@ -11,6 +24,9 @@ import {
 import { blobToFile, resizeImage224 } from "./image-utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import { HTTPErrorMessage } from "./helpers/customErrors";
+
+const { Paragraph } = Typography;
 
 axios.defaults.headers.post["Content-Type"] = "multipart/form-data";
 axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
@@ -18,6 +34,8 @@ axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
 interface Props {
     showModal: any;
     fileList: Array<TejasFile>;
+    setMainTaskId;
+    setCurrentStep;
 }
 
 interface TejasFile extends File {
@@ -34,15 +52,35 @@ const usePrevious = (value) => {
     return ref.current;
 };
 
+const taskProgressPercentageMap = {
+    UNKNOWN: 0,
+    FAILED: -10,
+    INITIALIZING: 10,
+    TRAINING: 40,
+    COMPLETED: 100,
+};
+
 const Training = (props: Props) => {
     const [timelineTexts, setTimelineTexts] = useState([]);
     const [loading, setLoading] = useState(false);
     const prevFileList = usePrevious(props.fileList);
     const [trainable, setTrainable] = useState(false);
+    // const [finishedTaskId, setFinishedTaskId] = useState(undefined);
+    const [taskStatus, setTaskStatus] = useState("");
+    const [taskStatusPercentage, setTaskStatusPercentage] = useState(0);
+    const [currentTaskId, setCurrentTaskId] = useState("");
 
     const addTimelineText = (text) => {
         setTimelineTexts((oldArray) => [...oldArray, text]);
     };
+
+    useEffect(() => {
+        // effect
+        props.setMainTaskId(currentTaskId);
+        return () => {
+            // cleanup
+        };
+    }, [currentTaskId]);
 
     useEffect(() => {
         // effect
@@ -88,7 +126,6 @@ const Training = (props: Props) => {
                     loading={loading}
                     onClick={async () => {
                         setLoading(true);
-                        setTimelineTexts([]);
 
                         if (!trainable) {
                             setLoading(false);
@@ -100,11 +137,12 @@ const Training = (props: Props) => {
                             return props.showModal(EmptyDataset);
                         }
 
-                        setTimelineTexts((oldArray) => [
-                            ...oldArray,
-                            "Creating Dataset Zip File",
-                        ]);
+                        // reset the timeline
+                        setTimelineTexts([]);
 
+                        addTimelineText("Creating Dataset Zip File");
+
+                        // create the resized zip file
                         var zip = new JSZip();
 
                         for (const file of props.fileList) {
@@ -152,52 +190,121 @@ const Training = (props: Props) => {
                         // const w = window.open(fileUrl, "_blank");
                         // w && w.focus();
 
-                        setTimelineTexts((oldArray) => [
-                            ...oldArray,
-                            "Finished Creating Dataset Zip File",
-                        ]);
+                        addTimelineText("Finished Creating Dataset Zip File");
 
                         let formData = new FormData();
                         formData.append("file", datasetFile);
                         formData.append("model_name", "mobilenet_v2");
 
                         try {
-                            const results = await axios.post(
-                                "https://u7stad9b0b.execute-api.ap-south-1.amazonaws.com/dev/api/v1/train/train_model",
-                                formData
+                            // upload the zip file and start training
+                            // const results = await axios.post(
+                            //     "https://u7stad9b0b.execute-api.ap-south-1.amazonaws.com/dev/api/v1/train/train_model",
+                            //     formData
+                            // );
+
+                            // console.log(results);
+
+                            // const taskId: string = results.data["taskId"];
+                            const taskId =
+                                "ff9d8adf-14cd-4a05-87d8-e49d4d0ed7c5";
+
+                            setCurrentTaskId(taskId);
+
+                            addTimelineText(
+                                `Task Created with taskId: ${taskId}`
                             );
 
-                            console.log(results);
+                            // Now that the training task is created
+                            // Start probing the STATUS of the Model Training
+                            let timesProbed = 0;
+                            let lastStatus = "";
 
-                            setTimelineTexts((oldArray) => [
-                                ...oldArray,
-                                `Task Created with taskId: ${results.data["taskId"]}`,
-                            ]);
+                            let intervalProbe = setInterval(async () => {
+                                // check if maxprobe is reached
+                                if (timesProbed == 10) {
+                                    clearInterval(intervalProbe);
+                                }
+
+                                // probe the status
+                                try {
+                                    const results = await axios.get(
+                                        "https://u7stad9b0b.execute-api.ap-south-1.amazonaws.com/dev/api/v1/tasks/details",
+                                        {
+                                            params: {
+                                                task_id: taskId,
+                                            },
+                                        }
+                                    );
+
+                                    console.log(results);
+
+                                    const taskStatusData = results.data;
+
+                                    if (
+                                        taskStatusData["taskStatus"] !=
+                                        lastStatus
+                                    ) {
+                                        addTimelineText(
+                                            `Task Status: ${taskStatusData["taskStatus"]}`
+                                        );
+                                    }
+
+                                    // set the task status
+                                    setTaskStatus(taskStatusData["taskStatus"]);
+                                    // update the percentage
+                                    setTaskStatusPercentage(
+                                        taskProgressPercentageMap[
+                                            taskStatusData["taskStatus"]
+                                        ]
+                                    );
+
+                                    // training is complete, stop probing
+                                    if (
+                                        taskStatusData["taskStatus"] ==
+                                        "COMPLETED"
+                                    ) {
+                                        clearInterval(intervalProbe);
+                                        // everything went success so we have to set trainable to false
+                                        setTrainable(false);
+                                        setLoading(false);
+                                    }
+
+                                    lastStatus = taskStatusData["taskStatus"];
+                                } catch (e) {
+                                    // some error occured in probing, stop everything
+                                    clearInterval(intervalProbe);
+                                    throw e;
+                                }
+                            }, 1 * 1000); // probe for 30 seconds
                         } catch (e) {
+                            // Some Error Occured
                             console.log(e);
 
-                            setTimelineTexts((oldArray) => [
-                                ...oldArray,
-                                "SOME ERROR OCCURED",
-                            ]);
+                            if (e.response !== undefined) {
+                                addTimelineText(
+                                    `ERROR: ${JSON.stringify(e.response)}`
+                                );
+                                props.showModal(
+                                    HTTPErrorMessage(JSON.stringify(e.response))
+                                );
+                            } else {
+                                addTimelineText(`ERROR: ${JSON.stringify(e)}`);
+                                props.showModal(
+                                    HTTPErrorMessage(JSON.stringify(e))
+                                );
+                            }
+
+                            // some error occured, we have to allow trainable
+                            setTrainable(true);
                             setLoading(false);
-                            return;
                         }
-
-                        setTimelineTexts((oldArray) => [
-                            ...oldArray,
-                            "Invoked Training for the Dataset",
-                        ]);
-
-                        // everything went success so we have to set trainable to false
-                        // setTrainable(false);
-                        setLoading(false);
                     }}
                 >
                     Start Training !
                 </Button>
             </div>
-            <Divider> Timeline</Divider>
+            <Divider>Timeline</Divider>
             <div
                 style={{
                     textAlign: "center",
@@ -211,6 +318,66 @@ const Training = (props: Props) => {
                     })}
                 </Timeline>
             </div>
+            {currentTaskId !== "" && (
+                <>
+                    <Divider>Status</Divider>
+                    <div
+                        style={{
+                            textAlign: "center",
+                        }}
+                    >
+                        <Descriptions
+                            bordered
+                            size={"small"}
+                            column={{
+                                xxl: 1,
+                                xl: 1,
+                                lg: 1,
+                                md: 1,
+                                sm: 1,
+                                xs: 1,
+                            }}
+                        >
+                            <Descriptions.Item label="TaskID">
+                                <Paragraph copyable>{currentTaskId}</Paragraph>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Progress">
+                                <Progress
+                                    percent={taskStatusPercentage}
+                                    status={
+                                        taskStatus == "FAILED"
+                                            ? "exception"
+                                            : taskStatus == "COMPLETED"
+                                            ? "success"
+                                            : "active"
+                                    }
+                                />
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Status">
+                                {taskStatus}
+                            </Descriptions.Item>
+                        </Descriptions>
+                    </div>
+                    {taskStatus == "COMPLETED" && (
+                        <div
+                            style={{
+                                textAlign: "center",
+                                marginTop: "20px",
+                            }}
+                        >
+                            <Button
+                                type="primary"
+                                icon={<ExperimentOutlined />}
+                                onClick={() => {
+                                    props.setCurrentStep("inference");
+                                }}
+                            >
+                                Start Inferencing
+                            </Button>
+                        </div>
+                    )}
+                </>
+            )}
         </div>
     );
 };

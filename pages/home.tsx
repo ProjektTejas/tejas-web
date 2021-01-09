@@ -19,6 +19,7 @@ const Home = () => {
         title: "",
         message: "",
     });
+    const [mainTaskId, setMainTaskid] = useState("");
 
     const showModal = (data) => {
         setModalData(data);
@@ -27,7 +28,6 @@ const Home = () => {
 
     // DATASET STATE
     const [fileList, setFileList] = useState([]);
-    const [zipDataset, setZipDataset] = useState(new JSZip());
 
     return (
         <>
@@ -53,11 +53,17 @@ const Home = () => {
                             currentStep !== "introduction" ? "hidden" : ""
                         }
                     >
-                        <Introduction showModal={showModal} />{" "}
+                        <Introduction
+                            setCurrentStep={setCurrentStep}
+                            showModal={showModal}
+                        />{" "}
                     </div>
 
                     <div className={currentStep !== "model" ? "hidden" : ""}>
-                        <Model showModal={showModal} />
+                        <Model
+                            setCurrentStep={setCurrentStep}
+                            showModal={showModal}
+                        />
                     </div>
 
                     <div className={currentStep !== "dataset" ? "hidden" : ""}>
@@ -69,17 +75,28 @@ const Home = () => {
                     </div>
 
                     <div className={currentStep !== "training" ? "hidden" : ""}>
-                        <Training fileList={fileList} showModal={showModal} />
+                        <Training
+                            fileList={fileList}
+                            setMainTaskId={setMainTaskid}
+                            showModal={showModal}
+                            setCurrentStep={setCurrentStep}
+                        />
                     </div>
 
                     <div
                         className={currentStep !== "inference" ? "hidden" : ""}
                     >
-                        <Inference showModal={showModal} />
+                        <Inference
+                            mainTaskid={mainTaskId}
+                            showModal={showModal}
+                        />
                     </div>
 
                     <div className={currentStep !== "download" ? "hidden" : ""}>
-                        <Download showModal={showModal} />
+                        <Download
+                            mainTaskId={mainTaskId}
+                            showModal={showModal}
+                        />
                     </div>
                     <Modal
                         title={modalData.title}

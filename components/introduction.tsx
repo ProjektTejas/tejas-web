@@ -9,6 +9,7 @@ const { Title, Paragraph, Text } = Typography;
 const { Step } = Steps;
 interface Props {
     showModal: any;
+    setCurrentStep;
 }
 
 const stepData = [
@@ -135,6 +136,9 @@ const Introduction = (props: Props) => {
                                 <Button
                                     type="primary"
                                     icon={<RightCircleOutlined />}
+                                    onClick={() => {
+                                        props.setCurrentStep("model");
+                                    }}
                                 >
                                     Start Experimenting !
                                 </Button>

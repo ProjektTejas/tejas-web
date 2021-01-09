@@ -30,6 +30,7 @@ const Sidebar = ({ width, currentStep, setCurrentStep }) => {
             <Menu
                 mode="inline"
                 style={{ height: "100%" }}
+                selectedKeys={[currentStep]}
                 defaultSelectedKeys={[currentStep]}
                 onClick={(e) => setCurrentStep(e.key)}
             >

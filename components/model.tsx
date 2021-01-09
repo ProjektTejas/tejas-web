@@ -21,6 +21,7 @@ const { Option } = Select;
 
 interface Props {
     showModal: any;
+    setCurrentStep;
 }
 
 const Model = (props: Props) => {
@@ -101,6 +102,9 @@ const Model = (props: Props) => {
                                 <Button
                                     type="primary"
                                     icon={<RightCircleOutlined />}
+                                    onClick={() => {
+                                        props.setCurrentStep("dataset");
+                                    }}
                                 >
                                     Upload Dataset
                                 </Button>

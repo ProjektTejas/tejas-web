@@ -2,7 +2,7 @@ import { InboxOutlined, RightCircleOutlined } from "@ant-design/icons";
 import { Button, Col, Divider, Image, Input, Row, Table, Upload } from "antd";
 import Title from "antd/lib/typography/Title";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const { Dragger } = Upload;
 
@@ -17,12 +17,21 @@ interface ClassifyResults {
 
 interface Props {
     showModal: any;
+    mainTaskid;
 }
 
 const Inference = (props: Props) => {
     const [imageFile, setImageFile] = useState(undefined);
     const [loading, setLoading] = useState(false);
     const [taskId, setTaskId] = useState("");
+
+    useEffect(() => {
+        // effect
+        setTaskId(props.mainTaskid);
+        return () => {
+            // cleanup
+        };
+    }, [props.mainTaskid]);
 
     const resultsColumns = [
         {
