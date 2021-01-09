@@ -30,10 +30,17 @@ const IncorrectFolderStructure = (fileName) => {
     };
 };
 
+const DatasetSameWarning = {
+    title: "Dataset is Same",
+    message:
+        "Please upload a new dataset to train the model on that, current dataset is already trained successfully",
+};
+
 export {
     MultipleFolderError,
     MaxFilesReachedError,
     FileTypeNotSupported,
     IncorrectFolderStructure,
     EmptyDataset,
+    DatasetSameWarning,
 };

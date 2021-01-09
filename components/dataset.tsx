@@ -33,26 +33,19 @@ const blankFileMap = {
 };
 
 const Dataset = (props: Props) => {
-    var dataUrl: string;
     var totalFiles: number = 0;
 
-    // const [fileList, setFileList] = useState([]);
     const [debouncedFileList] = useDebounce(props.fileList, 1000);
-    // var fileList = [];
 
     // Listen to the changes in fileList and update the Chonky UI accordingly
     useEffect(() => {
         // effect
         // console.log(props.fileList);
 
-        // setFileMap(blankFileMap);
-
         var newFileMap = JSON.parse(JSON.stringify(blankFileMap));
 
         debouncedFileList.forEach((file) => {
             const folderName = file.webkitRelativePath.split("/")[1];
-
-            // var newFileMap = JSON.parse(JSON.stringify(fileMap));
 
             if (newFileMap.fileMap[btoa(folderName)] === undefined) {
                 newFileMap.fileMap[btoa(folderName)] = {
@@ -90,8 +83,6 @@ const Dataset = (props: Props) => {
             ];
 
             newFileMap.fileMap[btoa(folderName)]["childrenCount"] += 1;
-
-            // setFileMap(newFileMap);
         });
         setFileMap(newFileMap);
         setShowLoading(false);
@@ -224,23 +215,6 @@ const Dataset = (props: Props) => {
                     </Col>
                 </Row>
             )}
-
-            {/* <Row gutter={[8, 8]}>
-                <Button
-                    onClick={async () => {
-                        // const fileUrl = URL.createObjectURL(
-                        //     await zip.generateAsync({ type: "blob" })
-                        // );
-                        // console.log(fileUrl);
-                        // const w = window.open(fileUrl, "_blank");
-                        // w && w.focus();
-                        console.log(fileMap);
-                        console.log(fileList);
-                    }}
-                >
-                    Generate
-                </Button>
-            </Row> */}
         </>
     );
 };

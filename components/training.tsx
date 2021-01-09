@@ -2,10 +2,18 @@ import { ClockCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import { Button, Descriptions, Divider, Row, Space, Timeline } from "antd";
 import Title from "antd/lib/typography/Title";
 import JSZip from "jszip";
-import { useState } from "react";
-import { MultipleFolderError, EmptyDataset } from "./helpers/uploadModals";
+import { useEffect, useRef, useState } from "react";
+import {
+    MultipleFolderError,
+    EmptyDataset,
+    DatasetSameWarning,
+} from "./helpers/uploadModals";
 import { blobToFile, resizeImage224 } from "./image-utils/utils";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+
+axios.defaults.headers.post["Content-Type"] = "multipart/form-data";
+axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
 
 interface Props {
     showModal: any;
@@ -16,9 +24,38 @@ interface TejasFile extends File {
     webkitRelativePath: string;
 }
 
+const usePrevious = (value) => {
+    const ref = useRef();
+
+    useEffect(() => {
+        ref.current = value;
+    });
+
+    return ref.current;
+};
+
 const Training = (props: Props) => {
     const [timelineTexts, setTimelineTexts] = useState([]);
     const [loading, setLoading] = useState(false);
+    const prevFileList = usePrevious(props.fileList);
+    const [trainable, setTrainable] = useState(false);
+
+    const addTimelineText = (text) => {
+        setTimelineTexts((oldArray) => [...oldArray, text]);
+    };
+
+    useEffect(() => {
+        // effect
+        if (prevFileList !== props.fileList) {
+            setTrainable(true);
+        }
+
+        console.log(`Trainable: ${trainable}`);
+
+        return () => {
+            // cleanup
+        };
+    }, [props.fileList]);
 
     return (
         <div>
@@ -52,6 +89,11 @@ const Training = (props: Props) => {
                     onClick={async () => {
                         setLoading(true);
                         setTimelineTexts([]);
+
+                        if (!trainable) {
+                            setLoading(false);
+                            return props.showModal(DatasetSameWarning);
+                        }
 
                         if (props.fileList.length == 0) {
                             setLoading(false);
@@ -115,6 +157,40 @@ const Training = (props: Props) => {
                             "Finished Creating Dataset Zip File",
                         ]);
 
+                        let formData = new FormData();
+                        formData.append("file", datasetFile);
+                        formData.append("model_name", "mobilenet_v2");
+
+                        try {
+                            const results = await axios.post(
+                                "https://u7stad9b0b.execute-api.ap-south-1.amazonaws.com/dev/api/v1/train/train_model",
+                                formData
+                            );
+
+                            console.log(results);
+
+                            setTimelineTexts((oldArray) => [
+                                ...oldArray,
+                                `Task Created with taskId: ${results.data["taskId"]}`,
+                            ]);
+                        } catch (e) {
+                            console.log(e);
+
+                            setTimelineTexts((oldArray) => [
+                                ...oldArray,
+                                "SOME ERROR OCCURED",
+                            ]);
+                            setLoading(false);
+                            return;
+                        }
+
+                        setTimelineTexts((oldArray) => [
+                            ...oldArray,
+                            "Invoked Training for the Dataset",
+                        ]);
+
+                        // everything went success so we have to set trainable to false
+                        // setTrainable(false);
                         setLoading(false);
                     }}
                 >
