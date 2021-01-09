@@ -25,11 +25,13 @@ import { blobToFile, resizeImage224 } from "./image-utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { HTTPErrorMessage } from "./helpers/customErrors";
+import { TEJAS_API_V1 } from "../lib/tejasEndpoints";
 
 const { Paragraph } = Typography;
 
 axios.defaults.headers.post["Content-Type"] = "multipart/form-data";
 axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
+axios.defaults.headers.get["Access-Control-Allow-Origin"] = "*";
 
 interface Props {
     showModal: any;
@@ -59,6 +61,14 @@ const taskProgressPercentageMap = {
     TRAINING: 40,
     COMPLETED: 100,
 };
+
+// probe cooldown in seconds
+const PROBE_COOLDOWN = 60;
+
+// maximum times to probe
+const PROBE_MAX_TIMES = 10;
+
+// so in total we probe for 60*10 == 600 seconds == 10 minutes
 
 const Training = (props: Props) => {
     const [timelineTexts, setTimelineTexts] = useState([]);
@@ -198,16 +208,18 @@ const Training = (props: Props) => {
 
                         try {
                             // upload the zip file and start training
-                            // const results = await axios.post(
-                            //     "https://u7stad9b0b.execute-api.ap-south-1.amazonaws.com/dev/api/v1/train/train_model",
-                            //     formData
-                            // );
+                            const results = await axios.post(
+                                `${TEJAS_API_V1}/train/train_model`,
+                                formData
+                            );
 
-                            // console.log(results);
+                            console.log(results);
 
-                            // const taskId: string = results.data["taskId"];
-                            const taskId =
-                                "ff9d8adf-14cd-4a05-87d8-e49d4d0ed7c5";
+                            const taskId: string = results.data["taskId"];
+
+                            // this id is for testing
+                            // const taskId =
+                            //     "ff9d8adf-14cd-4a05-87d8-e49d4d0ed7c5";
 
                             setCurrentTaskId(taskId);
 
@@ -222,14 +234,14 @@ const Training = (props: Props) => {
 
                             let intervalProbe = setInterval(async () => {
                                 // check if maxprobe is reached
-                                if (timesProbed == 10) {
+                                if (timesProbed == PROBE_MAX_TIMES) {
                                     clearInterval(intervalProbe);
                                 }
 
                                 // probe the status
                                 try {
                                     const results = await axios.get(
-                                        "https://u7stad9b0b.execute-api.ap-south-1.amazonaws.com/dev/api/v1/tasks/details",
+                                        `${TEJAS_API_V1}/tasks/details`,
                                         {
                                             params: {
                                                 task_id: taskId,
@@ -276,7 +288,9 @@ const Training = (props: Props) => {
                                     clearInterval(intervalProbe);
                                     throw e;
                                 }
-                            }, 1 * 1000); // probe for 30 seconds
+
+                                timesProbed++;
+                            }, PROBE_COOLDOWN * 1000); // probe every PROBE_COOLDOWN seconds, maximum PROBE_MAX_TIMES
                         } catch (e) {
                             // Some Error Occured
                             console.log(e);

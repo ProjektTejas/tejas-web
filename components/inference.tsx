@@ -3,6 +3,7 @@ import { Button, Col, Divider, Image, Input, Row, Table, Upload } from "antd";
 import Title from "antd/lib/typography/Title";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { TEJAS_API_V1 } from "../lib/tejasEndpoints";
 
 const { Dragger } = Upload;
 
@@ -125,15 +126,13 @@ const Inference = (props: Props) => {
                                     setLoading(true);
 
                                     let formData = new FormData();
-                                    formData.append(
-                                        "task_id",
-                                        "1f97675d-e04c-445b-bddd-7f7ff18cdd7b"
-                                    );
+                                    formData.append("task_id", taskId);
                                     formData.append("file", imageFile);
 
                                     try {
+                                        // hit the classify url
                                         const results = await axios.post(
-                                            "https://u7stad9b0b.execute-api.ap-south-1.amazonaws.com/dev/api/v1/classify/classify_image",
+                                            `${TEJAS_API_V1}/classify/classify_image`,
                                             formData
                                         );
 

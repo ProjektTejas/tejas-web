@@ -2,7 +2,7 @@ import Layout from "../components/core/layout";
 import { Modal } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../components/core/sidebar";
 import Introduction from "../components/introduction";
 import Model from "../components/model";
@@ -11,6 +11,12 @@ import Training from "../components/training";
 import Inference from "../components/inference";
 import Download from "../components/download";
 import JSZip from "jszip";
+import axios from "axios";
+import { TEJAS_API_V1 } from "../lib/tejasEndpoints";
+
+axios.defaults.headers.post["Content-Type"] = "multipart/form-data";
+axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
+axios.defaults.headers.get["Access-Control-Allow-Origin"] = "*";
 
 const Home = () => {
     const [currentStep, setCurrentStep] = useState("introduction");
@@ -28,6 +34,29 @@ const Home = () => {
 
     // DATASET STATE
     const [fileList, setFileList] = useState([]);
+
+    const wakeUpLambda = async () => {
+        try {
+            const results = await axios.get(
+                `${TEJAS_API_V1}/utils/test_server`
+            );
+            console.log(results);
+            console.log(results.data);
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    // This is just to wake up lambda
+    useEffect(() => {
+        // effect
+
+        wakeUpLambda();
+
+        return () => {
+            // cleanup
+        };
+    }, []);
 
     return (
         <>
