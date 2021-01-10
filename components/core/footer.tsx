@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
             }}
         >
             <a
-                href=""
+                href="https://github.com/ProjektTejas"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

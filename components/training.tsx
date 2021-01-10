@@ -98,7 +98,7 @@ const Training = (props: Props) => {
             setTrainable(true);
         }
 
-        console.log(`Trainable: ${trainable}`);
+        // console.log(`Trainable: ${trainable}`);
 
         return () => {
             // cleanup
