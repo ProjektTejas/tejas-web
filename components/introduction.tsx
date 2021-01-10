@@ -49,7 +49,7 @@ const Introduction = (props: Props) => {
     const [currentStep, setCurrentStep] = useState(0);
 
     const onChange = (current) => {
-        console.log("onChange:", current);
+        // console.log("onChange:", current);
         setCurrentStep(current);
     };
 
@@ -104,7 +104,10 @@ const Introduction = (props: Props) => {
                         >
                             <Row
                                 justify="center"
-                                style={{ alignItems: "center" }}
+                                style={{
+                                    alignItems: "center",
+                                    height: "30vh",
+                                }}
                             >
                                 <Col span={5}>
                                     <Image
@@ -115,7 +118,11 @@ const Introduction = (props: Props) => {
                                 </Col>
                                 <Col span={15}>
                                     <Typography>
-                                        <Title>
+                                        <Title
+                                            style={{
+                                                fontFamily: "IBM Plex Sans",
+                                            }}
+                                        >
                                             {stepData[currentStep].title}
                                         </Title>
                                         <Paragraph>
