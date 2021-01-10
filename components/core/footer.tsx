@@ -1,3 +1,5 @@
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Footer as AFooter } from "antd/lib/layout/layout";
 
 const Footer: React.FC = () => {
@@ -9,7 +11,18 @@ const Footer: React.FC = () => {
                 // marginLeft: 200,
             }}
         >
-            ProjektTejas (2020) Created with <span role="img"> 💖</span> and{" "}
+            <a
+                href=""
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                    color: "#2980b9",
+                    fontWeight: "bold",
+                }}
+            >
+                <FontAwesomeIcon icon={faGithub} /> ProjektTejas (2020)
+            </a>{" "}
+            Created with <span role="img"> 💖</span> and{" "}
             <span role="img">☕</span>
         </AFooter>
     );
