@@ -65,7 +65,16 @@ const Header: React.FC = () => {
                     }}
                 >
                     <Menu.Item key="1">Home</Menu.Item>
-                    <Menu.Item key="2">About</Menu.Item>
+                    <Menu.Item
+                        key="2"
+                        onClick={() => {
+                            const url =
+                                "https://projekt-tejas-docs.vercel.app/";
+                            window.open(url, "_blank");
+                        }}
+                    >
+                        About
+                    </Menu.Item>
                 </Menu>
             </AHeader>
         </>
