@@ -16,7 +16,7 @@ This repository contains the FrontEnd for Tejas.AI. Written in React-Next.JS, an
 ![maintainer](https://img.shields.io/badge/maintainer-shadowleaf-blue)
 ![GitHub stars](https://img.shields.io/github/stars/ProjektTejas/tejas-web?style=social)
 
-## Deployed Website: [http://tejas.tensorclan.tech/](http://tejas.tensorclan.tech/) or [https://project-tejas-web.vercel.app/](https://project-tejas-web.vercel.app/)
+## Deployed Website: [https://tejas.tensorclan.theschoolof.ai/](https://tejas.tensorclan.theschoolof.ai/) or [http://tejas.tensorclan.tech/](http://tejas.tensorclan.tech/) or [https://project-tejas-web.vercel.app/](https://project-tejas-web.vercel.app/)
 
 ## Docs Website: [https://projekt-tejas-docs.vercel.app/](https://projekt-tejas-docs.vercel.app/)
 
